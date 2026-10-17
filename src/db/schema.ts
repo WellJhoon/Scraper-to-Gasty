@@ -12,6 +12,7 @@ import {
 export const products = pgTable("products", {
   id: integer("id").primaryKey(),
   name: text("name"),
+  ean: text("ean"),
   image: text("image"),
   unit: text("unit"),
   brandId: integer("brandId"),
@@ -201,6 +202,29 @@ export const sirenaCatalogSyncState = pgTable("sirena_catalog_sync_state", {
   updatedAt: timestamp("updatedAt", { withTimezone: true }).notNull().defaultNow(),
 });
 
+export const shoppingLists = pgTable("shopping_lists", {
+  id: integer("id").primaryKey().generatedAlwaysAsIdentity(),
+  name: text("name").notNull(),
+  status: text("status").notNull().default("planning"), // "planning" | "in_store" | "completed"
+  selectedShopId: integer("selectedShopId"), // Supermercado elegido para "Modo En el Súper"
+  createdAt: timestamp("createdAt", { withTimezone: true }).notNull().defaultNow(),
+  updatedAt: timestamp("updatedAt", { withTimezone: true }).notNull().defaultNow(),
+});
+
+export const shoppingListItems = pgTable("shopping_list_items", {
+  id: integer("id").primaryKey().generatedAlwaysAsIdentity(),
+  listId: integer("listId").notNull(),
+  productId: integer("productId").notNull(),
+  quantity: numeric("quantity").notNull().default("1"),
+  checked: boolean("checked").notNull().default(false), // Tachado en el pasillo del súper
+  addedBy: text("addedBy").notNull().default("Jhon"), // "Jhon" | "Novia"
+  notes: text("notes"),
+  createdAt: timestamp("createdAt", { withTimezone: true }).notNull().defaultNow(),
+  updatedAt: timestamp("updatedAt", { withTimezone: true }).notNull().defaultNow(),
+});
+
+export type ProductRow = typeof products.$inferSelect;
+export type NewProductRow = typeof products.$inferInsert;
 export type ProductShopPriceRow = typeof productsShopsPrices.$inferSelect;
 export type ProductBrokenImageRow = typeof productBrokenImages.$inferSelect;
 export type ProductImageRow = typeof productImages.$inferSelect;
@@ -211,3 +235,7 @@ export type ProductShopRecoveryReviewRow =
 export type NacionalCatalogSyncStateRow =
   typeof nacionalCatalogSyncState.$inferSelect;
 export type SirenaCatalogSyncStateRow = typeof sirenaCatalogSyncState.$inferSelect;
+export type ShoppingListRow = typeof shoppingLists.$inferSelect;
+export type NewShoppingListRow = typeof shoppingLists.$inferInsert;
+export type ShoppingListItemRow = typeof shoppingListItems.$inferSelect;
+export type NewShoppingListItemRow = typeof shoppingListItems.$inferInsert;
