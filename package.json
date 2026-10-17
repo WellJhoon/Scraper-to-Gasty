@@ -36,6 +36,7 @@
     "dev:api": "tsx watch src/server/index.ts",
     "start:api": "node dist/server/index.js",
     "api:test": "tsx src/jobs/test-api-phase1.ts",
+    "api:test-lists": "tsx src/jobs/test-api-lists.ts",
     "scrape:prices-batch": "tsx src/jobs/scrape-prices-batch.ts",
     "scrape:sync-nacional-catalog": "tsx src/jobs/sync-nacional-catalog.ts",
     "scrape:sync-sirena-catalog": "tsx src/jobs/sync-sirena-catalog.ts",
