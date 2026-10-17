@@ -14,10 +14,31 @@ export async function handleHealthRoute(
   res: ServerResponse
 ): Promise<void> {
   try {
-    await postgresClient`select 1 as ok`;
+    const [stats] = await postgresClient<
+      {
+        tables_count: number;
+        products_count: number;
+        shops_count: number;
+        lists_count: number;
+      }[]
+    >`
+      select
+        (select count(*)::int from information_schema.tables where table_schema = 'public') as tables_count,
+        (select count(*)::int from public.products) as products_count,
+        (select count(distinct "shopId")::int from public.products_shops_prices) as shops_count,
+        (select count(*)::int from public.shopping_lists) as lists_count
+    `;
+
     sendJson(res, 200, {
       status: "ok",
       db: "connected",
+      provider: "supabase-postgresql",
+      stats: {
+        tablesCount: stats?.tables_count ?? 0,
+        shopsCount: stats?.shops_count ?? 0,
+        catalogProductsCount: stats?.products_count ?? 0,
+        shoppingListsCount: stats?.lists_count ?? 0,
+      },
       uptimeSeconds: Math.floor(process.uptime()),
       timestamp: new Date().toISOString(),
     });

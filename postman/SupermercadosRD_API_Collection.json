@@ -1,0 +1,455 @@
+{
+  "info": {
+    "_postman_id": "9f8e7d6c-5b4a-4321-8765-1029384756ab",
+    "name": "Gasty Private API — SupermercadosRD (Jhon & Sol)",
+    "description": "Colección End-to-End (HU-09 / GAS-9) para validar el backend privado de Gasty conectado a Supabase PostgreSQL.\n\nIncluye:\n1. GET /api/health (Salud de servidor y Supabase)\n2. GET /api/search?q=ketchup&live=true (Búsqueda en vivo en los 5 supermercados)\n3. POST /api/lists (Crear lista 'Compra de Prueba')\n4. POST /api/lists/:id/items (Agregar 4 productos reales: Arroz, Leche, Ketchup, Queso)\n5. POST /api/lists/:id/compare (Comparar canasta completa entre los 5 supermercados)\n6. POST /api/lists/:id/start-shopping (Activar Modo En el Súper)\n7. PATCH /api/lists/:id/items/:itemId (Tachar producto en pasillo y validar subtotal)",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:3000",
+      "type": "string"
+    },
+    {
+      "key": "appToken",
+      "value": "gasty-jhon-sol-private-2026",
+      "type": "string"
+    },
+    {
+      "key": "listId",
+      "value": "1",
+      "type": "string"
+    },
+    {
+      "key": "itemId",
+      "value": "1",
+      "type": "string"
+    },
+    {
+      "key": "winningShopId",
+      "value": "1",
+      "type": "string"
+    }
+  ],
+  "item": [
+    {
+      "name": "1. Health Check (Supabase Cloud DB)",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('Status code is 200', function () {",
+              "    pm.response.to.have.status(200);",
+              "});",
+              "pm.test('Supabase DB is connected and has tables', function () {",
+              "    const jsonData = pm.response.json();",
+              "    pm.expect(jsonData.status).to.eql('ok');",
+              "    pm.expect(jsonData.db).to.eql('connected');",
+              "    pm.expect(jsonData.stats.tablesCount).to.be.at.least(13);",
+              "});"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "x-app-token",
+            "value": "{{appToken}}",
+            "type": "text"
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/api/health",
+          "host": ["{{baseUrl}}"],
+          "path": ["api", "health"]
+        }
+      }
+    },
+    {
+      "name": "2. Live Search 5 Supermercados (Ketchup)",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('Status code is 200', function () {",
+              "    pm.response.to.have.status(200);",
+              "});",
+              "pm.test('Returns liveGroups across Dominican supermarkets', function () {",
+              "    const jsonData = pm.response.json();",
+              "    pm.expect(jsonData.liveGroups.length).to.be.above(0);",
+              "});"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "x-app-token",
+            "value": "{{appToken}}",
+            "type": "text"
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/api/search?q=ketchup&live=true&limit=6",
+          "host": ["{{baseUrl}}"],
+          "path": ["api", "search"],
+          "query": [
+            { "key": "q", "value": "ketchup" },
+            { "key": "live", "value": "true" },
+            { "key": "limit", "value": "6" }
+          ]
+        }
+      }
+    },
+    {
+      "name": "3. Crear Lista 'Compra de Prueba'",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('Status code is 201 Created', function () {",
+              "    pm.response.to.have.status(201);",
+              "});",
+              "const jsonData = pm.response.json();",
+              "if (jsonData.id) {",
+              "    pm.collectionVariables.set('listId', String(jsonData.id));",
+              "}"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "x-app-token",
+            "value": "{{appToken}}",
+            "type": "text"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json",
+            "type": "text"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"name\": \"Compra de Prueba\"\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/api/lists",
+          "host": ["{{baseUrl}}"],
+          "path": ["api", "lists"]
+        }
+      }
+    },
+    {
+      "name": "4a. Agregar Producto 1 — Arroz Campos 10 lb",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('Item 1 (Arroz) added', function () {",
+              "    pm.response.to.have.status(201);",
+              "});",
+              "const jsonData = pm.response.json();",
+              "if (jsonData.items && jsonData.items.length > 0) {",
+              "    pm.collectionVariables.set('itemId', String(jsonData.items[0].id));",
+              "}"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "x-app-token",
+            "value": "{{appToken}}",
+            "type": "text"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json",
+            "type": "text"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"rawQuery\": \"arroz campos 10 lb\",\n  \"quantity\": 1,\n  \"addedBy\": \"Jhon\"\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/api/lists/{{listId}}/items",
+          "host": ["{{baseUrl}}"],
+          "path": ["api", "lists", "{{listId}}", "items"]
+        }
+      }
+    },
+    {
+      "name": "4b. Agregar Producto 2 — Leche Evaporada Carnation 315g",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('Item 2 (Leche) added', function () {",
+              "    pm.response.to.have.status(201);",
+              "});"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "x-app-token",
+            "value": "{{appToken}}",
+            "type": "text"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json",
+            "type": "text"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"rawQuery\": \"leche evaporada carnation 315g\",\n  \"quantity\": 2,\n  \"addedBy\": \"Sol\"\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/api/lists/{{listId}}/items",
+          "host": ["{{baseUrl}}"],
+          "path": ["api", "lists", "{{listId}}", "items"]
+        }
+      }
+    },
+    {
+      "name": "4c. Agregar Producto 3 — Ketchup Heinz 14 oz",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('Item 3 (Ketchup) added', function () {",
+              "    pm.response.to.have.status(201);",
+              "});"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "x-app-token",
+            "value": "{{appToken}}",
+            "type": "text"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json",
+            "type": "text"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"rawQuery\": \"ketchup heinz\",\n  \"quantity\": 1,\n  \"addedBy\": \"Jhon\"\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/api/lists/{{listId}}/items",
+          "host": ["{{baseUrl}}"],
+          "path": ["api", "lists", "{{listId}}", "items"]
+        }
+      }
+    },
+    {
+      "name": "4d. Agregar Producto 4 — Queso Cheddar Sosua",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('Item 4 (Queso) added', function () {",
+              "    pm.response.to.have.status(201);",
+              "});"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "x-app-token",
+            "value": "{{appToken}}",
+            "type": "text"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json",
+            "type": "text"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"rawQuery\": \"queso sosua\",\n  \"quantity\": 1,\n  \"addedBy\": \"Sol\"\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/api/lists/{{listId}}/items",
+          "host": ["{{baseUrl}}"],
+          "path": ["api", "lists", "{{listId}}", "items"]
+        }
+      }
+    },
+    {
+      "name": "5. Comparar Canasta en los 5 Supermercados",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('Status code is 200', function () {",
+              "    pm.response.to.have.status(200);",
+              "});",
+              "pm.test('Returns supermarket ranking and winnerShop', function () {",
+              "    const jsonData = pm.response.json();",
+              "    pm.expect(jsonData.ranking.length).to.be.at.least(1);",
+              "    pm.expect(jsonData.winnerShop).to.not.be.null;",
+              "    if (jsonData.winnerShop) {",
+              "        pm.collectionVariables.set('winningShopId', String(jsonData.winnerShop.shopId));",
+              "    }",
+              "});"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "x-app-token",
+            "value": "{{appToken}}",
+            "type": "text"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json",
+            "type": "text"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"refreshStale\": true\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/api/lists/{{listId}}/compare",
+          "host": ["{{baseUrl}}"],
+          "path": ["api", "lists", "{{listId}}", "compare"]
+        }
+      }
+    },
+    {
+      "name": "6. Activar 'Modo En el Súper' con Supermercado Ganador",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('Status code is 200 and status is shopping', function () {",
+              "    pm.response.to.have.status(200);",
+              "    const jsonData = pm.response.json();",
+              "    pm.expect(jsonData.status).to.eql('shopping');",
+              "});"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "x-app-token",
+            "value": "{{appToken}}",
+            "type": "text"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json",
+            "type": "text"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"shopId\": {{winningShopId}}\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/api/lists/{{listId}}/start-shopping",
+          "host": ["{{baseUrl}}"],
+          "path": ["api", "lists", "{{listId}}", "start-shopping"]
+        }
+      }
+    },
+    {
+      "name": "7. Tachar Producto en Pasillo y Validar Subtotal",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('Status code is 200 and item is checked with subtotal', function () {",
+              "    pm.response.to.have.status(200);",
+              "    const jsonData = pm.response.json();",
+              "    pm.expect(jsonData.aisleSummary.checkedItems).to.be.at.least(1);",
+              "    pm.expect(jsonData.aisleSummary.inCartTotal).to.be.above(0);",
+              "});"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "method": "PATCH",
+        "header": [
+          {
+            "key": "x-app-token",
+            "value": "{{appToken}}",
+            "type": "text"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json",
+            "type": "text"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"checked\": true,\n  \"addedBy\": \"Sol\"\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/api/lists/{{listId}}/items/{{itemId}}",
+          "host": ["{{baseUrl}}"],
+          "path": ["api", "lists", "{{listId}}", "items", "{{itemId}}"]
+        }
+      }
+    }
+  ]
+}

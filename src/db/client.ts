@@ -47,16 +47,17 @@ const globalDb = globalThis as typeof globalThis & {
 
 const parsedPoolMax = Number(process.env.POSTGRES_MAX_CONNECTIONS);
 const poolMax = Number.isFinite(parsedPoolMax)
-  ? Math.max(1, parsedPoolMax)
-  : process.env.NODE_ENV === "development"
-    ? 1
-    : 5;
+  ? Math.max(1, Math.min(parsedPoolMax, 10))
+  : 5;
 
 const createClient = () =>
   postgres(databaseUrl, {
-    prepare: false,
+    prepare: false, // Required for Supabase Supavisor transaction mode (port 6543)
     connect_timeout: 15,
+    idle_timeout: 20, // Release idle connections quickly on Supabase Free Tier
+    max_lifetime: 60 * 30, // Recycle connections every 30 minutes
     max: poolMax,
+    onnotice: () => {}, // Suppress noisy "IF NOT EXISTS" notices
   });
 
 const client = globalDb.postgresClient ?? createClient();

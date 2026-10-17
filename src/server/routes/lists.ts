@@ -7,6 +7,8 @@ import {
 } from "../../cart/compare-cart.js";
 import { postgresClient } from "../../db/client.js";
 import { saveMatchedProductToCatalog } from "../../search/catalog-service.js";
+import { searchAllSupermarkets } from "../../search/live-search.js";
+import { groupEquivalentProducts } from "../../search/product-matcher.js";
 import type { MatchedProductGroup } from "../../search/types.js";
 import { readJsonBody, sendJson } from "../http-utils.js";
 
@@ -285,6 +287,8 @@ export async function handleAddListItemRoute(
   const body = await readJsonBody<{
     productId?: number;
     productGroup?: MatchedProductGroup;
+    rawQuery?: string;
+    query?: string;
     quantity?: number;
     addedBy?: "Jhon" | "Sol" | string;
     notes?: string;
@@ -298,10 +302,23 @@ export async function handleAddListItemRoute(
     productId = saved.productId;
   }
 
+  // Support adding by rawQuery / query (e.g. from Postman or Quick Add)
+  const searchQuery = (body.rawQuery ?? body.query ?? "").trim();
+  if ((!productId || Number.isNaN(productId)) && searchQuery) {
+    const liveResult = await searchAllSupermarkets(searchQuery, { limit: 6 });
+    const groups = groupEquivalentProducts(liveResult.items);
+    const bestGroup =
+      groups.find((g) => g.shopCount >= 2) ?? groups[0];
+    if (bestGroup) {
+      const saved = await saveMatchedProductToCatalog(bestGroup);
+      productId = saved.productId;
+    }
+  }
+
   if (!productId || Number.isNaN(productId)) {
     sendJson(res, 400, {
       error: "invalid_product",
-      message: "Provide either 'productId' or 'productGroup' to add an item.",
+      message: "Provide 'productId', 'productGroup', or 'rawQuery' to add an item.",
     });
     return;
   }
