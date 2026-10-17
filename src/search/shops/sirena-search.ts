@@ -16,16 +16,12 @@ export async function searchSirena(
   const timeoutMs = options.timeoutMs ?? DEFAULT_TIMEOUT_MS;
 
   try {
-    const url = new URL(SIRENA_PRODUCTS_SEARCH_API_URL);
-    url.searchParams.set("ft", query);
-    url.searchParams.set("_from", "0");
-    url.searchParams.set("_to", String(limit - 1));
-    url.searchParams.set("sc", "1");
+    const searchUrl = `${SIRENA_PRODUCTS_SEARCH_API_URL}?ft=${encodeURIComponent(query)}&_from=0&_to=${limit - 1}&sc=1`;
 
     const controller = new AbortController();
     const timeoutId = setTimeout(() => controller.abort(), timeoutMs);
 
-    const response = await fetch(url.toString(), {
+    const response = await fetch(searchUrl, {
       method: "GET",
       headers: getSirenaHeaders(),
       signal: controller.signal,
