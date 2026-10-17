@@ -217,7 +217,7 @@ export const shoppingListItems = pgTable("shopping_list_items", {
   productId: integer("productId").notNull(),
   quantity: numeric("quantity").notNull().default("1"),
   checked: boolean("checked").notNull().default(false), // Tachado en el pasillo del súper
-  addedBy: text("addedBy").notNull().default("Jhon"), // "Jhon" | "Novia"
+  addedBy: text("addedBy").notNull().default("Jhon"), // "Jhon" | "Sol"
   notes: text("notes"),
   createdAt: timestamp("createdAt", { withTimezone: true }).notNull().defaultNow(),
   updatedAt: timestamp("updatedAt", { withTimezone: true }).notNull().defaultNow(),
