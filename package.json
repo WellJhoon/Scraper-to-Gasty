@@ -31,6 +31,7 @@
     "db:prune": "tsx src/jobs/prune-history.ts",
     "search:phase1": "tsx src/jobs/test-search-phase1.ts",
     "search:live": "tsx src/jobs/test-live-search.ts",
+    "search:matcher": "tsx src/jobs/test-matcher.ts",
     "scrape:prices-batch": "tsx src/jobs/scrape-prices-batch.ts",
     "scrape:sync-nacional-catalog": "tsx src/jobs/sync-nacional-catalog.ts",
     "scrape:sync-sirena-catalog": "tsx src/jobs/sync-sirena-catalog.ts",

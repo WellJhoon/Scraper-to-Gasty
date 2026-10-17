@@ -30,3 +30,27 @@ export interface MultiSearchResult {
   items: LiveSearchResultItem[];
   durationMs: number;
 }
+
+export type MatchConfidence =
+  | "exact_ean"
+  | "ccn_shared_sku"
+  | "high_similarity"
+  | "single_shop";
+
+export interface MatchedProductGroup {
+  canonicalName: string;
+  unit?: string;
+  baseUnit?: string;
+  baseUnitAmount?: number;
+  ean?: string;
+  imageUrl?: string;
+  matchConfidence: MatchConfidence;
+  similarityScore: number;
+  cheapestShopId: number;
+  cheapestShopName: string;
+  cheapestPrice: number;
+  mostExpensivePrice: number;
+  maxSavings: number;
+  shopCount: number;
+  offers: LiveSearchResultItem[];
+}
