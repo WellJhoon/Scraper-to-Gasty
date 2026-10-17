@@ -1,0 +1,44 @@
+export { scrapePrice } from "./scrape-price.js";
+export { scrapeProductImages } from "./scrape-product-images.js";
+export { scrapeManyRoundRobin } from "./scrape-many.js";
+
+export {
+  fetchWithRetry,
+  fetchWithBrowser,
+  getHeadersByShopId,
+  getNacionalHeaders,
+  getJumboHeaders,
+  getSirenaHeaders,
+  getPlazaLamaHeaders,
+  getPricesmartHeaders,
+  getBravoHeaders,
+  getCarrefourHeaders,
+} from "./http-client.js";
+
+export type {
+  FetchWithRetryConfig,
+  ScrapeManyOptions,
+  ScrapeProductImagesError,
+  ScrapeProductImagesInput,
+  ScrapeProductImagesNotFound,
+  ScrapeProductImagesResult,
+  ScrapeProductImagesSuccess,
+  ScrapePriceError,
+  ScrapePriceInput,
+  ScrapePriceNotFound,
+  ScrapePriceResult,
+  ScrapePriceSuccess,
+  ShopId,
+  ShopName,
+} from "./types.js";
+
+export {
+  scrapeSirenaPrice,
+  scrapeNacionalPrice,
+  scrapeJumboPrice,
+  scrapeMercaJumboPrice,
+  scrapePlazaLamaPrice,
+  scrapePricesmartPrice,
+  scrapeBravoPrice,
+  scrapeCarrefourPrice,
+} from "./shops/index.js";
