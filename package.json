@@ -38,6 +38,7 @@
     "api:test": "tsx src/jobs/test-api-phase1.ts",
     "api:test-lists": "tsx src/jobs/test-api-lists.ts",
     "api:test-e2e": "tsx src/jobs/test-e2e-postman.ts",
+    "scrape:sync-all": "tsx src/jobs/sync-all-supermarkets.ts",
     "scrape:prices-batch": "tsx src/jobs/scrape-prices-batch.ts",
     "scrape:sync-nacional-catalog": "tsx src/jobs/sync-nacional-catalog.ts",
     "scrape:sync-sirena-catalog": "tsx src/jobs/sync-sirena-catalog.ts",

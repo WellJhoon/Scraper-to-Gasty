@@ -17,6 +17,7 @@ import {
   handleGetProductByIdRoute,
   handleHealthRoute,
   handleSearchRoute,
+  handleStoreCatalogRoute,
 } from "./routes/search.js";
 
 const PORT = Number(process.env.PORT || 3000);
@@ -51,6 +52,22 @@ export async function routeRequest(
 
     if (method === "GET" && pathname === "/api/search") {
       await handleSearchRoute(req, res, parsedUrl);
+      return;
+    }
+
+    if (method === "GET" && pathname === "/api/catalog") {
+      await handleStoreCatalogRoute(req, res, parsedUrl);
+      return;
+    }
+
+    if (method === "POST" && pathname === "/api/sync") {
+      const { syncAllSupermarketCatalogs } = await import("../jobs/sync-all-supermarkets.js");
+      const result = await syncAllSupermarketCatalogs();
+      sendJson(res, 200, {
+        ok: true,
+        message: "Catálogos de todos los supermercados sincronizados exitosamente.",
+        ...result,
+      });
       return;
     }
 
@@ -148,7 +165,21 @@ export function startApiServer(port = PORT) {
     console.log(`   • PATCH  http://localhost:${port}/api/lists/:id/items/:itemId`);
     console.log(`   • DELETE http://localhost:${port}/api/lists/:id/items/:itemId`);
     console.log(`   • POST   http://localhost:${port}/api/lists/:id/compare`);
-    console.log(`   • POST   http://localhost:${port}/api/lists/:id/start-shopping\n`);
+    console.log(`   • POST   http://localhost:${port}/api/lists/:id/start-shopping`);
+    console.log(`   • POST   http://localhost:${port}/api/sync (Sincronización manual / cron)\n`);
+
+    // Iniciar cron automático cada 24 horas para mantener los catálogos actualizados diariamente
+    const TWENTY_FOUR_HOURS_MS = 24 * 60 * 60 * 1000;
+    setInterval(async () => {
+      console.log("\n⏰ [CRON-24H] Ejecutando sincronización automática diaria de todos los supermercados...");
+      try {
+        const { syncAllSupermarketCatalogs } = await import("../jobs/sync-all-supermarkets.js");
+        await syncAllSupermarketCatalogs();
+        console.log("✅ [CRON-24H] Sincronización diaria completada con éxito.\n");
+      } catch (cronErr) {
+        console.error("❌ [CRON-24H] Error en sincronización diaria:", cronErr);
+      }
+    }, TWENTY_FOUR_HOURS_MS);
   });
 
   return server;

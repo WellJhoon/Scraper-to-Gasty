@@ -38,6 +38,19 @@ const PACKAGING_STOPWORDS = new Set([
   "clasica",
   "sabor",
   "tipo",
+  // Exclusive supermarket private-label tokens so equivalent store brands match by generic product name
+  "wala",
+  "esentis",
+  "zerca",
+  "lider",
+  "siremas",
+  "sirena",
+  "bravo",
+  "carrefour",
+  "garrido",
+  "members",
+  "member",
+  "selection",
 ]);
 
 const UNIT_WORDS = new Set([

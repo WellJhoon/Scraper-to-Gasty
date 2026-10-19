@@ -177,3 +177,96 @@ export async function handleGetProductByIdRoute(
 
   sendJson(res, 200, data);
 }
+
+const STORE_SLUG_TO_SHOP_ID: Record<string, number> = {
+  sirena: 1,
+  nacional: 2,
+  jumbo: 3,
+  plazaLama: 4,
+  plazalama: 4,
+  pricesmart: 5,
+  bravo: 6,
+  carrefour: 7,
+  garrido: 8,
+  ritmo: 9,
+};
+
+export async function handleStoreCatalogRoute(
+  _req: IncomingMessage,
+  res: ServerResponse,
+  parsedUrl: URL
+): Promise<void> {
+  const storeParam = (parsedUrl.searchParams.get("store") ?? "").trim();
+  const shopIdParam = Number(parsedUrl.searchParams.get("shopId"));
+  const shopId =
+    !Number.isNaN(shopIdParam) && shopIdParam > 0
+      ? shopIdParam
+      : STORE_SLUG_TO_SHOP_ID[storeParam] ?? 1;
+
+  const limit = Math.max(1, Math.min(Number(parsedUrl.searchParams.get("limit") ?? 100), 300));
+  const query = (parsedUrl.searchParams.get("q") ?? "").trim();
+  const pattern = `%${query}%`;
+
+  const rows = await postgresClient<
+    {
+      productId: number;
+      name: string | null;
+      unit: string | null;
+      image: string | null;
+      shopId: number;
+      currentPrice: string | number | null;
+      regularPrice: string | number | null;
+      url: string;
+    }[]
+  >`
+    select
+      p."id" as "productId",
+      p."name",
+      p."unit",
+      p."image",
+      sp."shopId",
+      sp."currentPrice",
+      sp."regularPrice",
+      sp."url"
+    from products_shops_prices sp
+    inner join products p on p."id" = sp."productId"
+    where sp."shopId" = ${shopId}
+      and coalesce(p."deleted", false) = false
+      and coalesce(sp."hidden", false) = false
+      and (${query === ""} or p."name" ilike ${pattern})
+    order by sp."updateAt" desc nulls last, p."id" desc
+    limit ${limit}
+  `;
+
+  // Strictly filter out exclusive brands from other supermarkets
+  const filtered = rows.filter((row) => {
+    const title = (row.name ?? "").toLowerCase();
+    if (shopId !== 1 && /\b(wala|esentis|zerca|first\s+class|siremas|sirem[aá]s)\b/i.test(title)) {
+      return false;
+    }
+    if (shopId !== 2 && shopId !== 3 && /\bl[ií]der\b/i.test(title)) {
+      return false;
+    }
+    if (shopId !== 5 && /\bmember'?s\s+selection\b/i.test(title)) {
+      return false;
+    }
+    return true;
+  });
+
+  sendJson(res, 200, {
+    shopId,
+    store: storeParam || Object.keys(STORE_SLUG_TO_SHOP_ID).find((k) => STORE_SLUG_TO_SHOP_ID[k] === shopId) || "sirena",
+    count: filtered.length,
+    items: filtered.map((r) => ({
+      productId: r.productId,
+      name: r.name,
+      unit: r.unit,
+      imageUrl: r.image,
+      shopId: r.shopId,
+      currentPrice: Number(r.currentPrice ?? 0),
+      regularPrice: Number(r.regularPrice ?? r.currentPrice ?? 0),
+      url: r.url,
+    })),
+  });
+}
+
