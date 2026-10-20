@@ -2,7 +2,7 @@ import { pruneOldHistory } from "../db/ensure-core-schema.js";
 import { closeDb } from "../db/client.js";
 
 async function main() {
-  const days = 21;
+  const days = process.env.PRUNE_DAYS ? Number(process.env.PRUNE_DAYS) : 7;
   console.log(`[DB:PRUNE] ⏳ Purgando historial de precios anterior a ${days} días...`);
   const deletedCount = await pruneOldHistory(days);
   console.log(

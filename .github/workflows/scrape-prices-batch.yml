@@ -1,6 +1,9 @@
 name: scrape-prices-batch
 
 on:
+  schedule:
+    # Corre todos los días a las 08:00 UTC (04:00 AM hora Santo Domingo / RD)
+    - cron: "0 8 * * *"
   workflow_dispatch:
 
 env:
@@ -10,7 +13,6 @@ jobs:
   scrape-prices-batch:
     runs-on: ubuntu-latest
     timeout-minutes: 50
-    environment: Production
 
     steps:
       - name: Checkout
@@ -33,6 +35,15 @@ jobs:
       - name: Install Chrome for Puppeteer
         run: pnpm exec puppeteer browsers install chrome
 
+      - name: Setup .env file
+        env:
+          DOTENV_CONTENT: ${{ secrets.ENV_FILE }}
+        run: |
+          if [ -n "$DOTENV_CONTENT" ]; then
+            echo "$DOTENV_CONTENT" > .env
+            echo "✅ .env creado exitosamente desde secret ENV_FILE"
+          fi
+
       - name: Run prices batch scraper
         env:
           DATABASE_URL: ${{ secrets.DATABASE_URL }}
@@ -47,8 +58,10 @@ jobs:
           NACIONAL_REST_API_URL: ${{ secrets.NACIONAL_REST_API_URL }}
           PLAZA_LAMA_GRAPHQL_URL: ${{ secrets.PLAZA_LAMA_GRAPHQL_URL }}
           PLAZA_LAMA_DPL_API_KEY: ${{ secrets.PLAZA_LAMA_DPL_API_KEY }}
+          BRAVO_AUTH_TOKEN: ${{ secrets.BRAVO_AUTH_TOKEN }}
           PRICESMART_PRODUCT_API_URL: ${{ secrets.PRICESMART_PRODUCT_API_URL }}
           PRICESMART_DISCOVERY_API_URL: ${{ secrets.PRICESMART_DISCOVERY_API_URL }}
+          PRICESMART_AUTH_KEY: ${{ secrets.PRICESMART_AUTH_KEY }}
           CARREFOUR_TYPESENSE_API_KEY: ${{ secrets.CARREFOUR_TYPESENSE_API_KEY }}
           CARREFOUR_PLAZA_DUARTE_COLLECTION_ID: ${{ secrets.CARREFOUR_PLAZA_DUARTE_COLLECTION_ID }}
         run: |
@@ -57,3 +70,9 @@ jobs:
             --urls-per-shop 5 \
             --delay-min 600 \
             --delay-max 1200
+
+      - name: Prune old price history (> 7 days)
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+        run: pnpm db:prune
+

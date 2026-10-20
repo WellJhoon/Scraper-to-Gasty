@@ -178,10 +178,10 @@ export async function ensureCoreSchema(): Promise<void> {
 }
 
 /**
- * Purgador automático de historial de precios anterior a N días (default: 21 días).
+ * Purgador automático de historial de precios anterior a N días (default: 7 días).
  * Mantiene el almacenamiento en Supabase siempre por debajo de 10 MB.
  */
-export async function pruneOldHistory(days = 21): Promise<number> {
+export async function pruneOldHistory(days = 7): Promise<number> {
   const result = await postgresClient`
     delete from products_prices_history
     where "createdAt" < now() - (${days} || ' days')::interval
