@@ -27,6 +27,8 @@
   "scripts": {
     "build": "tsc -p tsconfig.build.json",
     "clean": "rm -rf dist",
+    "start": "node dist/server/index.js",
+    "start:api": "node dist/server/index.js",
     "db:init": "tsx src/jobs/init-db.ts",
     "db:prune": "tsx src/jobs/prune-history.ts",
     "search:phase1": "tsx src/jobs/test-search-phase1.ts",
