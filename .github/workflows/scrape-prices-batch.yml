@@ -1,0 +1,59 @@
+name: scrape-prices-batch
+
+on:
+  schedule:
+    # Corre todos los días a las 08:00 UTC (04:00 AM hora Santo Domingo / RD)
+    - cron: "0 8 * * *"
+  workflow_dispatch:
+
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: "true"
+
+jobs:
+  scrape-prices-batch:
+    runs-on: ubuntu-latest
+    timeout-minutes: 50
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 8.14.0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20.x
+          cache: pnpm
+
+      - name: Install
+        run: pnpm install --frozen-lockfile
+
+      - name: Install Chrome for Puppeteer
+        run: pnpm exec puppeteer browsers install chrome
+
+      - name: Setup .env file
+        env:
+          DOTENV_CONTENT: ${{ secrets.ENV_FILE }}
+        run: |
+          if [ -n "$DOTENV_CONTENT" ]; then
+            echo "$DOTENV_CONTENT" > .env
+            echo "✅ .env creado exitosamente desde secret ENV_FILE"
+          else
+            echo "⚠️ No se encontro secret ENV_FILE"
+          fi
+
+      - name: Run prices batch scraper
+        run: |
+          pnpm scrape:prices-batch \
+            --iterations 80 \
+            --urls-per-shop 5 \
+            --delay-min 600 \
+            --delay-max 1200
+
+      - name: Prune old price history (> 7 days)
+        run: pnpm db:prune
+
