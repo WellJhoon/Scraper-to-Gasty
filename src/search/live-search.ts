@@ -13,7 +13,7 @@ import type {
 } from "./types.js";
 
 const EXCLUSIVE_STORE_BRAND_REGEX =
-  /\b(wala|esentis|zerca|first\s+class|siremas|sirem[aá]s|sirena|l[ií]der|great\s+value|member'?s\s+selection|bravo|carrefour|plaza\s+lama|ritmo|garrido)\b/gi;
+  /\b(wala|esentis|zerca|first\s+class|siremas|sirem[aá]s|sirena|l[ií]der|great\s+value|member'?s\s+selection|bravo|plaza\s+lama|garrido)\b/gi;
 
 /**
  * Strips supermarket-exclusive private label tokens from a search query so that

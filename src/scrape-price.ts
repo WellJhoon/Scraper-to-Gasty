@@ -1,6 +1,5 @@
 import {
   scrapeBravoPrice,
-  scrapeCarrefourPrice,
   scrapeJumboPrice,
   scrapeMercaJumboPrice,
   scrapeGarridoPrice,
@@ -36,7 +35,5 @@ export async function scrapePrice(
       return scrapeBravoPrice(input, requestConfig);
     case 8:
       return scrapeGarridoPrice(input, requestConfig);
-    case 10:
-      return scrapeCarrefourPrice(input, requestConfig);
   }
 }

@@ -13,7 +13,7 @@ import type {
 } from "../types.js";
 
 const shopId = 8;
-const GARRIDO_URL_SKU_PATTERN = /\/p\/([^/?#]+)/i;
+const GARRIDO_URL_SKU_PATTERN = /\/(?:p|articulos)\/([^/?#]+)/i;
 
 const query = `query GetProductsBySKU($getProductsBySKUInput: GetProductsBySKUInput!) {
   getProductsBySKU(getProductsBySKUInput: $getProductsBySKUInput) {

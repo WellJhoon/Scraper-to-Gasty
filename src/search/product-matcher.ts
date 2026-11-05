@@ -46,7 +46,6 @@ const PACKAGING_STOPWORDS = new Set([
   "siremas",
   "sirena",
   "bravo",
-  "carrefour",
   "garrido",
   "members",
   "member",

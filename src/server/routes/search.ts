@@ -186,9 +186,7 @@ const STORE_SLUG_TO_SHOP_ID: Record<string, number> = {
   plazalama: 4,
   pricesmart: 5,
   bravo: 6,
-  carrefour: 7,
   garrido: 8,
-  ritmo: 9,
 };
 
 export async function handleStoreCatalogRoute(

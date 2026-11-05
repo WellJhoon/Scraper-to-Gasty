@@ -436,13 +436,6 @@ export function getBravoHeaders(): Record<string, string> {
   };
 }
 
-export function getCarrefourHeaders(): Record<string, string> {
-  return {
-    Accept: "application/json",
-    "x-typesense-api-key": process.env.CARREFOUR_TYPESENSE_API_KEY?.trim() ?? "",
-  };
-}
-
 export function getHeadersByShopId(shopId: ShopId): Record<string, string> {
   switch (shopId) {
     case 1:
@@ -455,8 +448,6 @@ export function getHeadersByShopId(shopId: ShopId): Record<string, string> {
       return getNacionalHeaders();
     case 8:
       return getGarridoHeaders();
-    case 10:
-      return getCarrefourHeaders();
     case 4:
       return getPlazaLamaHeaders();
     case 5:

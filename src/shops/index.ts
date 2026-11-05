@@ -6,4 +6,3 @@ export { scrapePlazaLamaPrice } from "./plaza-lama.js";
 export { scrapePricesmartPrice } from "./pricesmart.js";
 export { scrapeBravoPrice } from "./bravo.js";
 export { scrapeGarridoPrice } from "./garrido.js";
-export { scrapeCarrefourPrice } from "./carrefour.js";
